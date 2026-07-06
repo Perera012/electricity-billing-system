@@ -25,11 +25,7 @@ SECRET_KEY = 'django-insecure-tggdkug8gvd$1=3h8usadxe0r)49$mg@@c8@8tq=q@1nfc*p&t
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [
-    '127.0.0.1',
-    'localhost',
-    'crouch-zipping-cardinal.ngrok-free.app',
-]
+ALLOWED_HOSTS =['*']
 
 CSRF_TRUSTED_ORIGINS = [
     'https://crouch-zipping-cardinal.ngrok-free.app',
@@ -58,7 +54,11 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    
 ]
+
 
 ROOT_URLCONF = 'electricity_system.urls'
 
@@ -126,6 +126,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'

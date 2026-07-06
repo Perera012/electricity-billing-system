@@ -63,49 +63,56 @@ Payment Confirmation
                     <p><strong>Bill Amount:</strong> {{ bill.total_amount }}</p>
 <p><strong>Hash:</strong> {{ hash }}</p>
 
-                    <form method="post"
-                          action="https://sandbox.payhere.lk/pay/checkout">
+<form method="post"
+      action="https://sandbox.payhere.lk/pay/checkout">
 
-                       
-                          <input type="hidden"
-name="return_url"
-value="https://crouch-zipping-cardinal.ngrok-free.dev/payhere-success/?bill_id={{ bill.id }}">
+    <input type="hidden"
+           name="merchant_id"
+           value="1236661">
+<p>Merchant ID: 1236661</p>
+<p>Order ID: {{ order_id }}</p>
+<p>Amount: {{ bill.total_amount|floatformat:2 }}</p>
+<p>Hash: {{ hash }}</p>
+         
 
-<input type="hidden"
-name="cancel_url"
-value="https://crouch-zipping-cardinal.ngrok-free.dev/payhere-cancel/">
+    <input type="hidden"
+           name="return_url"
+           value="https://crouch-zipping-cardinal.ngrok-free.dev/payhere-success/?bill_id={{ bill.id }}">
 
-<input type="hidden"
-name="notify_url"
-value="https://crouch-zipping-cardinal.ngrok-free.dev/payhere-notify/">
-                        <input type="hidden"
-                            name="order_id"
-                            
-                            value="{{ bill.id }}">
+    <input type="hidden"
+           name="cancel_url"
+           value="https://crouch-zipping-cardinal.ngrok-free.dev/payhere-cancel/">
 
-                            
+    <input type="hidden"
+           name="notify_url"
+           value="https://crouch-zipping-cardinal.ngrok-free.dev/payhere-notify/">
 
-                        <input type="hidden"
-                               name="items"
-                               value="Electricity Bill">
+    <input type="hidden"
+           name="order_id"
+           value="{{ order_id }}">
 
-                        <input type="hidden"
-                               name="currency"
-                               value="LKR">
+    <input type="hidden"
+           name="items"
+           value="Electricity Bill">
 
-                               
+    <input type="hidden"
+           name="currency"
+           value="LKR">
 
-<input type="hidden"
-       name="hash"
-       value="{{ hash }}">
+    <input type="hidden"
+           name="amount"
+           value="{{ bill.total_amount|floatformat:2 }}">
 
-<input type="hidden"
-       name="amount"
-       value="{{ bill.total_amount|floatformat:2 }}">
+    <input type="hidden"
+           name="hash"
+           value="{{ hash }}">                    
+
+
 
                         <input type="hidden"
                                name="first_name"
                                value="{{ bill.user.username }}">
+  
 
                         <input type="hidden"
                                name="last_name"

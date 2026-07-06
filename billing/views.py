@@ -174,9 +174,11 @@ def make_payment(request, bill_id):
         user=request.user
     )
 
-    merchant_id = "1236661"
+    merchant_id = "1236737"
 
-    merchant_secret = "MjQ4NDUyMTQ4MTIyNDQzODcxNTIyNTAyMDYzNDUxMjI5MjY2MTg0Mg=="
+    merchant_secret = "MzI3MTMxNDgxNDM0Mzk1MzE3NTQwNzIxNTMwODc0MTQ4NDg5MTkz"
+
+    order_id = "ORDER123"
 
     amount = format(
         Decimal(bill.total_amount),
@@ -184,8 +186,6 @@ def make_payment(request, bill_id):
     )
 
     currency = "LKR"
-
-    order_id = f"ORDER{bill.id}"
 
     hashed_secret = hashlib.md5(
         merchant_secret.encode()
@@ -200,6 +200,17 @@ def make_payment(request, bill_id):
             hashed_secret
         ).encode()
     ).hexdigest().upper()
+
+    print("Merchant ID:", merchant_id)
+    print("Order ID:", order_id)
+    print("Amount:", amount)
+    print("Currency:", currency)
+    print("Hash:", hash_value)
+    print("Merchant Secret:", merchant_secret)
+    print("Hashed Secret:", hashed_secret)
+    print("Hash Value:", hash_value)
+
+
 
     return render(
         request,
@@ -342,3 +353,4 @@ def payhere_cancel(request):
 def payhere_notify(request):
 
     return HttpResponse("OK")
+
