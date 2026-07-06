@@ -1,0 +1,142 @@
+{% extends 'billing/base.html' %}
+
+{% block title %}
+Add Meter Reading
+{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+    <div class="row justify-content-center">
+
+        <div class="col-md-8">
+
+            <div class="card shadow-lg border-0">
+
+                <div class="card-header text-white"
+                     style="background:#7A0019;">
+
+                    <h3 class="mb-0">
+                        Add Meter Reading
+                    </h3>
+
+                </div>
+
+                <div class="card-body">
+
+                    {% if error %}
+                    <div class="alert alert-danger">
+                        {{ error }}
+                    </div>
+                    {% endif %}
+
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+
+                        {% for error in form.non_field_errors %}
+                            <p class="mb-0">
+                                {{ error }}
+                            </p>
+                        {% endfor %}
+
+                    </div>
+                    {% endif %}
+
+                    <!-- Last Reading Information -->
+
+                    {% if last_reading %}
+
+                    <div class="alert alert-info">
+
+                        <strong>
+                            Last Recorded Reading:
+                        </strong>
+
+                        {{ last_reading.current_reading }}
+
+                    </div>
+
+                    {% else %}
+
+                    <div class="alert alert-info">
+
+                        <strong>
+                            First Meter Reading Submission
+                        </strong>
+
+                    </div>
+
+                    {% endif %}
+
+                    <form method="POST"
+                          enctype="multipart/form-data">
+
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                Month
+                            </label>
+
+                            {{ form.month }}
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                Current Reading
+                            </label>
+
+                            {{ form.current_reading }}
+
+                            <small class="text-muted">
+                                Enter the current meter reading shown on your electricity meter.
+                            </small>
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                Meter Image
+                            </label>
+
+                            {{ form.meter_image }}
+
+                            <small class="text-muted">
+                                Upload a clear image of your electricity meter.
+                            </small>
+
+                        </div>
+
+                        <button
+                            type="submit"
+                            class="btn btn-success">
+
+                            Calculate Bill
+
+                        </button>
+
+                        <a href="/"
+                           class="btn btn-secondary">
+
+                            Back Home
+
+                        </a>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

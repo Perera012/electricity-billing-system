@@ -1,0 +1,75 @@
+{% extends "billing/base.html" %}
+
+{% block title %}
+Admin Dashboard
+{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+    <h1 class="mb-4">
+        Admin Dashboard
+    </h1>
+
+    <div class="row g-4">
+
+        <div class="col-md-3">
+            <div class="card bg-primary text-white shadow">
+                <div class="card-body text-center">
+                    <h5>Total Users</h5>
+                    <h2>{{ total_users }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-success text-white shadow">
+                <div class="card-body text-center">
+                    <h5>Total Bills</h5>
+                    <h2>{{ total_bills }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-warning shadow">
+                <div class="card-body text-center">
+                    <h5>Paid Bills</h5>
+                    <h2>{{ paid_bills }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-danger text-white shadow">
+                <div class="card-body text-center">
+                    <h5>Unpaid Bills</h5>
+                    <h2>{{ unpaid_bills }}</h2>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card shadow mt-5">
+        <div class="card-body text-center">
+
+            <h3>Total Revenue Collected</h3>
+
+            <h1 class="text-success">
+                Rs. {{ total_revenue }}
+            </h1>
+
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a href="/" class="btn btn-secondary">
+            Back Home
+        </a>
+    </div>
+
+</div>
+
+{% endblock %}
