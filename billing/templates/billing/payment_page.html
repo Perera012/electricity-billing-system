@@ -68,25 +68,21 @@ Payment Confirmation
 
     <input type="hidden"
            name="merchant_id"
-           value="1236661">
-<p>Merchant ID: 1236661</p>
-<p>Order ID: {{ order_id }}</p>
-<p>Amount: {{ bill.total_amount|floatformat:2 }}</p>
-<p>Hash: {{ hash }}</p>
-         
+           value="1236737">
 
-    <input type="hidden"
-           name="return_url"
-           value="https://crouch-zipping-cardinal.ngrok-free.dev/payhere-success/?bill_id={{ bill.id }}">
 
-    <input type="hidden"
-           name="cancel_url"
-           value="https://crouch-zipping-cardinal.ngrok-free.dev/payhere-cancel/">
+       <input type="hidden"
+       name="return_url"
+       value="https://electricity-billing-system-kr7s.onrender.com/payhere-success/?bill_id={{ bill.id }}">
 
-    <input type="hidden"
-           name="notify_url"
-           value="https://crouch-zipping-cardinal.ngrok-free.dev/payhere-notify/">
+<input type="hidden"
+       name="cancel_url"
+       value="https://electricity-billing-system-kr7s.onrender.com/payhere-cancel/">
 
+<input type="hidden"
+       name="notify_url"
+       value="https://electricity-billing-system-kr7s.onrender.com/payhere-notify/">
+   
     <input type="hidden"
            name="order_id"
            value="{{ order_id }}">

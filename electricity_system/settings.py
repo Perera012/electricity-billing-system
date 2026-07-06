@@ -83,14 +83,13 @@ WSGI_APPLICATION = 'electricity_system.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+import dj_database_url
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.parse(
+        "postgresql://electricity_user:2XLHB1kWBK1bNcQwsQFcY9D3vdfiuHyg@dpg-d95q7ga8qa3s73e9mf10-a.singapore-postgres.render.com/electricity_billing_ow9b"
+    )
 }
-
-
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
 

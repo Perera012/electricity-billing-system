@@ -176,9 +176,9 @@ def make_payment(request, bill_id):
 
     merchant_id = "1236737"
 
-    merchant_secret = "MzI3MTMxNDgxNDM0Mzk1MzE3NTQwNzIxNTMwODc0MTQ4NDg5MTkz"
+    merchant_secret = "MTM5OTkzMjk3NTQyNDYxNjk0ODcxNTk2MzI3Nzk2MjU4MTc3NjUzMg=="
 
-    order_id = "ORDER123"
+    order_id = order_id = str(bill.id)
 
     amount = format(
         Decimal(bill.total_amount),
@@ -313,16 +313,20 @@ def download_bill(request, bill_id):
     p.save()
 
     return response
-
 def payhere_success(request):
 
     bill_id = request.GET.get('bill_id')
+
+    print("SUCCESS CALLBACK HIT")
+    print("Bill ID:", bill_id)
 
     if bill_id:
 
         try:
 
             bill = Bill.objects.get(id=bill_id)
+
+            print("Found Bill:", bill.id)
 
             if bill.bill_status != "Paid":
 
@@ -337,11 +341,18 @@ def payhere_success(request):
                 bill.bill_status = "Paid"
                 bill.save()
 
+                print("Bill marked as PAID")
+
         except Bill.DoesNotExist:
-            pass
+
+            print("Bill not found")
+
+    else:
+
+        print("No bill_id received")
+        
 
     return redirect('bill_history')
-
 
 def payhere_cancel(request):
 
@@ -351,6 +362,9 @@ def payhere_cancel(request):
 
 
 def payhere_notify(request):
+
+    print("PAYHERE NOTIFY HIT")
+    print(request.POST)
 
     return HttpResponse("OK")
 
