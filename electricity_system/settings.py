@@ -9,8 +9,10 @@ https://docs.djangoproject.com/en/6.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
-
 from pathlib import Path
+
+import os
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -84,12 +86,17 @@ WSGI_APPLICATION = 'electricity_system.wsgi.application'
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 import dj_database_url
-
 DATABASES = {
-    'default': dj_database_url.parse(
-        "postgresql://electricity_user:2XLHB1kWBK1bNcQwsQFcY9D3vdfiuHyg@dpg-d95q7ga8qa3s73e9mf10-a.singapore-postgres.render.com/electricity_billing_ow9b"
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'electricity_billing_ow9b',
+        'USER': 'electricity_user',
+        'PASSWORD': '2XLHB1kWBK1bNcQwsQFcY9D3vdfiuHyg',
+        'HOST': 'dpg-d95q7ga8qa3s73e9mf10-a.singapore-postgres.render.com',
+        'PORT': '5432',
+    }
 }
+
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
 
