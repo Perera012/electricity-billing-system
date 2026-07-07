@@ -205,13 +205,8 @@ def make_payment(request, bill_id):
     print("Order ID:", order_id)
     print("Amount:", amount)
     print("Currency:", currency)
-    print("Hash:", hash_value)
-    print("Merchant Secret:", merchant_secret)
-    print("Hashed Secret:", hashed_secret)
-    print("Hash Value:", hash_value)
 
-
-
+    
     return render(
         request,
         'billing/payment_page.html',
@@ -270,6 +265,12 @@ def admin_dashboard(request):
         context
     )
 
+from reportlab.pdfgen import canvas
+from reportlab.lib import colors
+from django.conf import settings
+import os
+
+
 @login_required
 def download_bill(request, bill_id):
 
@@ -290,23 +291,184 @@ def download_bill(request, bill_id):
 
     p = canvas.Canvas(response)
 
-    p.setFont("Helvetica-Bold", 18)
-    p.drawString(220, 800, "Electricity Bill")
+    # ----------------------------
+    # LOGO
+    # ----------------------------
+
+    logo_path = os.path.join(
+        settings.BASE_DIR,
+        'billing',
+        'static',
+        'images',
+        'logo.png'
+    )
+
+    if os.path.exists(logo_path):
+        p.drawImage(
+            logo_path,
+            40,
+            740,
+            width=60,
+            height=60
+        )
+
+    # ----------------------------
+    # HEADER
+    # ----------------------------
+
+    p.setFont("Helvetica-Bold", 20)
+    p.drawString(
+        120,
+        770,
+        "Smart Electricity Billing System"
+    )
+
+    p.setStrokeColor(colors.darkred)
+    p.line(40, 730, 550, 730)
+
+    # ----------------------------
+    # BILL INFO
+    # ----------------------------
+
+    p.setFont("Helvetica-Bold", 12)
+
+    p.drawString(40, 700, f"Bill Number:")
+    p.drawString(150, 700, f"#{bill.id}")
+
+    p.drawString(40, 675, "Generated Date:")
+    p.drawString(
+        150,
+        675,
+        bill.created_at.strftime("%d-%m-%Y")
+    )
+
+    # ----------------------------
+    # CUSTOMER SECTION
+    # ----------------------------
+
+    p.setFillColor(colors.lightgrey)
+    p.rect(40, 600, 500, 50, fill=1)
+
+    p.setFillColor(colors.black)
+
+    p.setFont("Helvetica-Bold", 13)
+    p.drawString(50, 630, "Customer Information")
 
     p.setFont("Helvetica", 12)
 
-    p.drawString(50, 740, f"Customer: {bill.user.username}")
-    p.drawString(50, 710, f"Month: {reading.month}")
-    p.drawString(50, 680, f"Previous Reading: {reading.previous_reading}")
-    p.drawString(50, 650, f"Current Reading: {reading.current_reading}")
-    p.drawString(50, 620, f"Units Used: {reading.units_used}")
-    p.drawString(50, 590, f"Total Amount: Rs. {bill.total_amount}")
-    p.drawString(50, 560, f"Bill Status: {bill.bill_status}")
+    p.drawString(
+        50,
+        610,
+        f"Customer Name: {bill.user.username}"
+    )
+
+    p.drawString(
+        300,
+        610,
+        f"Month: {reading.month}"
+    )
+
+    # ----------------------------
+    # METER DETAILS
+    # ----------------------------
+
+    p.setFillColor(colors.lightgrey)
+    p.rect(40, 470, 500, 100, fill=1)
+
+    p.setFillColor(colors.black)
+
+    p.setFont("Helvetica-Bold", 13)
+    p.drawString(50, 550, "Meter Reading Details")
+
+    p.setFont("Helvetica", 12)
 
     p.drawString(
         50,
-        520,
-        "Smart Electricity Billing System"
+        525,
+        f"Previous Reading: {reading.previous_reading}"
+    )
+
+    p.drawString(
+        50,
+        500,
+        f"Current Reading: {reading.current_reading}"
+    )
+
+    p.drawString(
+        50,
+        475,
+        f"Units Used: {reading.units_used}"
+    )
+
+    # ----------------------------
+    # BILLING SECTION
+    # ----------------------------
+
+    p.setFillColor(colors.lightgrey)
+    p.rect(40, 340, 500, 90, fill=1)
+
+    p.setFillColor(colors.black)
+
+    p.setFont("Helvetica-Bold", 13)
+    p.drawString(50, 410, "Billing Information")
+
+    p.setFont("Helvetica", 12)
+
+    p.drawString(
+        50,
+        385,
+        f"Amount Due: Rs. {bill.total_amount}"
+    )
+
+    p.drawString(
+        50,
+        360,
+        f"Bill Status: {bill.bill_status}"
+    )
+
+    # ----------------------------
+    # PAID / UNPAID HIGHLIGHT
+    # ----------------------------
+
+    if bill.bill_status == "Paid":
+
+        p.setFillColor(colors.green)
+
+    else:
+
+        p.setFillColor(colors.red)
+
+    p.rect(400, 360, 100, 30, fill=1)
+
+    p.setFillColor(colors.white)
+    p.setFont("Helvetica-Bold", 12)
+
+    p.drawString(
+        425,
+        372,
+        bill.bill_status
+    )
+
+    # ----------------------------
+    # FOOTER
+    # ----------------------------
+
+    p.setFillColor(colors.black)
+
+    p.line(40, 250, 550, 250)
+
+    p.setFont("Helvetica", 11)
+
+    p.drawString(
+        120,
+        220,
+        "Thank you for using our system"
+    )
+
+    p.drawString(
+        80,
+        200,
+        "Smart Electricity Billing & Online Payment Management"
     )
 
     p.showPage()
@@ -317,7 +479,7 @@ def payhere_success(request):
 
     bill_id = request.GET.get('bill_id')
 
-    print("SUCCESS CALLBACK HIT")
+    
     print("Bill ID:", bill_id)
 
     if bill_id:
