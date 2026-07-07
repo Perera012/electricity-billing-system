@@ -26,8 +26,9 @@ SECRET_KEY = 'django-insecure-tggdkug8gvd$1=3h8usadxe0r)49$mg@@c8@8tq=q@1nfc*p&t
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
-ALLOWED_HOSTS =['*']
+ALLOWED_HOSTS = [
+    "electricity-billing-system-kr7s.onrender.com",
+]
 
 CSRF_TRUSTED_ORIGINS = [
     'https://crouch-zipping-cardinal.ngrok-free.app',
@@ -58,7 +59,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
-      
+    'django.contrib.sessions.middleware.SessionMiddleware',
 ]
 
 
