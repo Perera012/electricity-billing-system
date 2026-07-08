@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-tggdkug8gvd$1=3h8usadxe0r)49$mg@@c8@8tq=q@1nfc*p&t'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 ALLOWED_HOSTS = [
     "electricity-billing-system-kr7s.onrender.com",
 ]
