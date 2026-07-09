@@ -291,9 +291,7 @@ def download_bill(request, bill_id):
 
     p = canvas.Canvas(response)
 
-    # ----------------------------
-    # LOGO
-    # ----------------------------
+
 
     logo_path = os.path.join(
         settings.BASE_DIR,
@@ -312,9 +310,7 @@ def download_bill(request, bill_id):
             height=60
         )
 
-    # ----------------------------
-    # HEADER
-    # ----------------------------
+   
 
     p.setFont("Helvetica-Bold", 20)
     p.drawString(
@@ -326,10 +322,7 @@ def download_bill(request, bill_id):
     p.setStrokeColor(colors.darkred)
     p.line(40, 730, 550, 730)
 
-    # ----------------------------
-    # BILL INFO
-    # ----------------------------
-
+  
     p.setFont("Helvetica-Bold", 12)
 
     p.drawString(40, 700, f"Bill Number:")
@@ -342,9 +335,7 @@ def download_bill(request, bill_id):
         bill.created_at.strftime("%d-%m-%Y")
     )
 
-    # ----------------------------
-    # CUSTOMER SECTION
-    # ----------------------------
+ 
 
     p.setFillColor(colors.lightgrey)
     p.rect(40, 600, 500, 50, fill=1)
@@ -368,9 +359,6 @@ def download_bill(request, bill_id):
         f"Month: {reading.month}"
     )
 
-    # ----------------------------
-    # METER DETAILS
-    # ----------------------------
 
     p.setFillColor(colors.lightgrey)
     p.rect(40, 470, 500, 100, fill=1)
@@ -400,10 +388,7 @@ def download_bill(request, bill_id):
         f"Units Used: {reading.units_used}"
     )
 
-    # ----------------------------
-    # BILLING SECTION
-    # ----------------------------
-
+  
     p.setFillColor(colors.lightgrey)
     p.rect(40, 340, 500, 90, fill=1)
 
@@ -426,9 +411,7 @@ def download_bill(request, bill_id):
         f"Bill Status: {bill.bill_status}"
     )
 
-    # ----------------------------
-    # PAID / UNPAID HIGHLIGHT
-    # ----------------------------
+  
 
     if bill.bill_status == "Paid":
 
@@ -449,9 +432,6 @@ def download_bill(request, bill_id):
         bill.bill_status
     )
 
-    # ----------------------------
-    # FOOTER
-    # ----------------------------
 
     p.setFillColor(colors.black)
 
@@ -479,18 +459,20 @@ def payhere_success(request):
 
     bill_id = request.GET.get('bill_id')
 
-    
+    print("SUCCESS CALLBACK HIT")
     print("Bill ID:", bill_id)
 
     if bill_id:
 
         try:
-
             bill = Bill.objects.get(id=bill_id)
 
-            print("Found Bill:", bill.id)
+            payment_exists = Payment.objects.filter(
+                bill=bill,
+                payment_status="Success"
+            ).exists()
 
-            if bill.bill_status != "Paid":
+            if not payment_exists:
 
                 Payment.objects.create(
                     user=bill.user,
@@ -503,16 +485,13 @@ def payhere_success(request):
                 bill.bill_status = "Paid"
                 bill.save()
 
-                print("Bill marked as PAID")
+                print("Payment recorded")
+
+            else:
+                print("Duplicate payment prevented")
 
         except Bill.DoesNotExist:
-
             print("Bill not found")
-
-    else:
-
-        print("No bill_id received")
-        
 
     return redirect('bill_history')
 
