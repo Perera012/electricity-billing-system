@@ -455,6 +455,7 @@ def download_bill(request, bill_id):
     p.save()
 
     return response
+
 def payhere_success(request):
 
     bill_id = request.GET.get('bill_id')
@@ -493,7 +494,7 @@ def payhere_success(request):
         except Bill.DoesNotExist:
             print("Bill not found")
 
-    return redirect('bill_history')
+    return redirect('payment-history')
 
 def payhere_cancel(request):
 
