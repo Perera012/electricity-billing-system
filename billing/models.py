@@ -47,7 +47,10 @@ class Payment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     bill = models.ForeignKey(Bill, on_delete=models.CASCADE)
     payment_method = models.CharField(max_length=50)
-    transaction_reference = models.CharField(max_length=100)
+    transaction_reference = models.CharField(
+    max_length=100,
+    unique=True
+)
     payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS, default='Pending')
     payment_date = models.DateTimeField(auto_now_add=True)
 
