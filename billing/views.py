@@ -494,7 +494,7 @@ def payhere_success(request):
         except Bill.DoesNotExist:
             print("Bill not found")
 
-    return redirect('payment-history')
+    return redirect('payment_history')
 
 def payhere_cancel(request):
 
