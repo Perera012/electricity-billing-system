@@ -1,63 +1,31 @@
 from decimal import Decimal
+from .models import TariffRate
 
 
 def calculate_bill(units):
-
     units = int(units)
 
     total = Decimal("0.00")
-    fixed_charge = Decimal("0.00")
 
-    if units <= 30:
+    tariffs = TariffRate.objects.order_by("min_units")
 
-        total += Decimal(units) * Decimal("5.00")
-        fixed_charge = Decimal("80.00")
+    for tariff in tariffs:
 
-    elif units <= 60:
+        if units >= tariff.min_units:
 
-        total += Decimal(30) * Decimal("5.00")
-        total += Decimal(units - 30) * Decimal("9.00")
+            upper_limit = min(units, tariff.max_units)
 
-        fixed_charge = Decimal("210.00")
+            slab_units = upper_limit - tariff.min_units + 1
 
-    elif units <= 90:
+            if slab_units > 0:
+                total += Decimal(slab_units) * tariff.rate_per_unit
 
-        total += Decimal(30) * Decimal("5.00")
-        total += Decimal(30) * Decimal("9.00")
-        total += Decimal(units - 60) * Decimal("14.00")
+    applicable_tariff = TariffRate.objects.filter(
+        min_units__lte=units,
+        max_units__gte=units
+    ).first()
 
-        fixed_charge = Decimal("0.00")
+    if applicable_tariff:
+        total += applicable_tariff.fixed_charge
 
-    elif units <= 120:
-
-        total += Decimal(30) * Decimal("5.00")
-        total += Decimal(30) * Decimal("9.00")
-        total += Decimal(30) * Decimal("14.00")
-        total += Decimal(units - 90) * Decimal("20.00")
-
-        fixed_charge = Decimal("400.00")
-
-    elif units <= 180:
-
-        total += Decimal(30) * Decimal("5.00")
-        total += Decimal(30) * Decimal("9.00")
-        total += Decimal(30) * Decimal("14.00")
-        total += Decimal(30) * Decimal("20.00")
-        total += Decimal(units - 120) * Decimal("28.00")
-
-        fixed_charge = Decimal("1000.00")
-
-    else:
-
-        total += Decimal(30) * Decimal("5.00")
-        total += Decimal(30) * Decimal("9.00")
-        total += Decimal(30) * Decimal("14.00")
-        total += Decimal(30) * Decimal("20.00")
-        total += Decimal(60) * Decimal("28.00")
-        total += Decimal(units - 180) * Decimal("44.00")
-
-        fixed_charge = Decimal("1500.00")
-
-    final_bill = total + fixed_charge
-
-    return final_bill
+    return total
