@@ -14,6 +14,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     "electricity-billing-system-kr7s.onrender.com",
+    "electricity-billing-system-docker.onrender.com",
     "127.0.0.1",
     "localhost",
 ]
