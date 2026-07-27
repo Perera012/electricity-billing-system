@@ -1,17 +1,17 @@
-import os
-import platform
 import cv2
 import pytesseract
 import re
-
+import os
 import platform
 
+# Configure Tesseract path
 if platform.system() == "Windows":
     pytesseract.pytesseract.tesseract_cmd = (
         r"C:\Program Files\Tesseract-OCR\tesseract.exe"
     )
 else:
     pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
+
 
 def extract_meter_reading(image_path):
 
@@ -23,11 +23,13 @@ def extract_meter_reading(image_path):
     if image is None:
         return None
 
+    # Convert to grayscale
     gray = cv2.cvtColor(
         image,
         cv2.COLOR_BGR2GRAY
     )
 
+    # Enlarge image
     gray = cv2.resize(
         gray,
         None,
@@ -38,6 +40,7 @@ def extract_meter_reading(image_path):
 
     best_number = None
 
+    # Try multiple thresholds
     for threshold in [80, 100, 120, 140, 160, 180, 200]:
 
         _, thresh = cv2.threshold(
@@ -58,6 +61,7 @@ def extract_meter_reading(image_path):
             iterations=1
         )
 
+        # Try different page segmentation modes
         for psm in [6, 7, 8, 13]:
 
             config = (
@@ -75,20 +79,36 @@ def extract_meter_reading(image_path):
 
             numbers = re.findall(r"\d+", text)
 
-            if numbers:
+            valid_numbers = []
 
-                candidate = max(
-                    numbers,
-                    key=len
+            for num in numbers:
+
+                # Most electricity meters contain 4-6 digits
+                if 4 <= len(num) <= 6:
+                    valid_numbers.append(num)
+
+            if valid_numbers:
+
+                # Remove duplicates
+                valid_numbers = list(set(valid_numbers))
+
+                # Prefer the longest number
+                valid_numbers.sort(
+                    key=len,
+                    reverse=True
                 )
 
-                if len(candidate) >= 3:
-                    return candidate
+                print("Valid Numbers:", valid_numbers)
 
-                if (
-                    best_number is None or
-                    len(candidate) > len(best_number)
-                ):
-                    best_number = candidate
+                return valid_numbers[0]
+
+            # Fallback if OCR only finds short numbers
+            for num in numbers:
+
+                if best_number is None:
+                    best_number = num
+
+                elif len(num) > len(best_number):
+                    best_number = num
 
     return best_number
