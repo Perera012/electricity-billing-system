@@ -54,6 +54,17 @@
                     <form method="POST">
 
                         {% csrf_token %}
+                        <form method="POST">
+    {% csrf_token %}
+
+    {% if form.errors %}
+    <div class="alert alert-danger">
+        {{ form.errors }}
+    </div>
+    {% endif %}
+
+    <!-- Username -->
+    ...
 
                         <div class="mb-3">
 

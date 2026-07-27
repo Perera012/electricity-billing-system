@@ -11,6 +11,8 @@ def register(request):
             user = form.save()
             login(request, user)
             return redirect('home')
+        else:
+            print(form.errors)   # <-- Add this line
 
     else:
         form = RegisterForm()

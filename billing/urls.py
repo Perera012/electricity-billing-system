@@ -66,3 +66,4 @@ urlpatterns = [
         name='payhere_notify'
     ),
 ]
+

@@ -4,12 +4,13 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.models import User
 from django.http import HttpResponse
 from reportlab.pdfgen import canvas
-
 from .forms import MeterReadingForm
 from .models import MeterReading, Bill, Payment
 from .utils import calculate_bill
 import hashlib
 from decimal import Decimal
+from .services import extract_meter_reading
+from django.contrib import messages
 
 def home(request):
     return render(request, 'billing/home.html')
@@ -34,19 +35,15 @@ def add_meter_reading(request):
 
         if form.is_valid():
 
-            meter_reading = form.save(
-                commit=False
-            )
+            meter_reading = form.save(commit=False)
 
             # Check duplicate month
-
             existing = Bill.objects.filter(
                 user=request.user,
                 meter_reading__month=meter_reading.month
             ).exists()
 
             if existing:
-
                 return render(
                     request,
                     'billing/add_meter_reading.html',
@@ -60,44 +57,94 @@ def add_meter_reading(request):
             meter_reading.user = request.user
 
             # Auto set previous reading
-
             if last_reading:
-
-                meter_reading.previous_reading = (
-                    last_reading.current_reading
-                )
-
+                meter_reading.previous_reading = last_reading.current_reading
             else:
-
                 meter_reading.previous_reading = 0
 
             # Validate current reading
-
-            if (
-                meter_reading.current_reading <=
-                meter_reading.previous_reading
-            ):
-
+            if meter_reading.current_reading <= meter_reading.previous_reading:
                 return render(
                     request,
                     'billing/add_meter_reading.html',
                     {
                         'form': form,
                         'last_reading': last_reading,
-                        'error':
-                        f'Current reading must be greater than the previous reading ({meter_reading.previous_reading}).'
+                        'error': f'Current reading must be greater than the previous reading ({meter_reading.previous_reading}).'
                     }
                 )
 
             # Calculate units used
-
             meter_reading.units_used = (
                 meter_reading.current_reading -
                 meter_reading.previous_reading
             )
 
+            # --------------------------------------------------
+            # SAVE FIRST (This saves the image to media/)
+            # --------------------------------------------------
             meter_reading.save()
 
+            # --------------------------------------------------
+            # OCR Verification
+            # --------------------------------------------------
+            if meter_reading.meter_image:
+
+                print("Saved Image Path:", meter_reading.meter_image.path)
+
+                ocr_result = extract_meter_reading(
+                    meter_reading.meter_image.path
+                )
+
+                if ocr_result is None:
+
+                    # Remove invalid record
+                    meter_reading.delete()
+
+                    return render(
+                        request,
+                        'billing/add_meter_reading.html',
+                        {
+                            'form': form,
+                            'last_reading': last_reading,
+                            'error': 'Unable to read the uploaded meter image. Please upload a clearer image.'
+                        }
+                    )
+
+                try:
+                    ocr_reading = int(ocr_result)
+
+                except ValueError:
+
+                    meter_reading.delete()
+
+                    return render(
+                        request,
+                        'billing/add_meter_reading.html',
+                        {
+                            'form': form,
+                            'last_reading': last_reading,
+                            'error': 'OCR detected an invalid meter reading.'
+                        }
+                    )
+
+                entered_reading = int(meter_reading.current_reading)
+
+                if ocr_reading != entered_reading:
+
+                    meter_reading.delete()
+
+                    return render(
+                        request,
+                        'billing/add_meter_reading.html',
+                        {
+                            'form': form,
+                            'last_reading': last_reading,
+                            'error': f'OCR detected {ocr_reading}, but you entered {entered_reading}. Please verify your reading.'
+                        }
+                    )
+
+            # Create Bill
             total_amount = calculate_bill(
                 meter_reading.units_used
             )
@@ -109,12 +156,9 @@ def add_meter_reading(request):
                 bill_status='Unpaid'
             )
 
-            return redirect(
-                'bill_history'
-            )
+            return redirect('bill_history')
 
     else:
-
         form = MeterReadingForm()
 
     return render(
@@ -125,8 +169,6 @@ def add_meter_reading(request):
             'last_reading': last_reading
         }
     )
-
-
 @login_required
 def bill_history(request):
 
@@ -458,13 +500,9 @@ def download_bill(request, bill_id):
 
 def payhere_success(request):
 
-    bill_id = request.GET.get('bill_id')
-
-    print("SUCCESS CALLBACK HIT")
-    print("Bill ID:", bill_id)
+    bill_id = request.GET.get("bill_id")
 
     if bill_id:
-
         try:
             bill = Bill.objects.get(id=bill_id)
 
@@ -474,7 +512,6 @@ def payhere_success(request):
             ).exists()
 
             if not payment_exists:
-
                 Payment.objects.create(
                     user=bill.user,
                     bill=bill,
@@ -486,22 +523,24 @@ def payhere_success(request):
                 bill.bill_status = "Paid"
                 bill.save()
 
-                print("Payment recorded")
-
-            else:
-                print("Duplicate payment prevented")
+            messages.success(
+                request,
+                "Payment completed successfully."
+            )
 
         except Bill.DoesNotExist:
-            print("Bill not found")
+            messages.error(
+                request,
+                "Bill not found."
+            )
 
-    return redirect('payment_history')
+    return redirect("home")
 
 def payhere_cancel(request):
 
     return HttpResponse(
         "Payment was cancelled."
     )
-
 
 def payhere_notify(request):
 
