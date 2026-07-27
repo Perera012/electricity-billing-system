@@ -47,15 +47,23 @@ Add Meter Reading
 
                     {% if last_reading %}
 
-                    <div class="alert alert-info">
+                <div class="alert alert-info">
 
-                        <strong>
-                            Last Recorded Reading:
-                        </strong>
+    <h6 class="mb-3">
+        <strong>Previous Meter Information</strong>
+    </h6>
 
-                        {{ last_reading.current_reading }}
+    <p class="mb-1">
+        <strong>Previous Month:</strong>
+        {{ last_reading.month }}
+    </p>
 
-                    </div>
+    <p class="mb-0">
+        <strong>Previous Meter Reading:</strong>
+        {{ last_reading.current_reading }}
+    </p>
+
+</div>
 
                     {% else %}
 
