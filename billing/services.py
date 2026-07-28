@@ -4,7 +4,7 @@ import re
 import os
 import platform
 
-# Configure Tesseract path
+# Configure Tesseract
 if platform.system() == "Windows":
     pytesseract.pytesseract.tesseract_cmd = (
         r"C:\Program Files\Tesseract-OCR\tesseract.exe"
@@ -16,66 +16,102 @@ else:
 def extract_meter_reading(image_path):
 
     try:
-        print("STEP 1 - File Exists")
 
         if not os.path.exists(image_path):
-            print("File not found")
             return None
-
-        print("STEP 2 - Reading Image")
 
         image = cv2.imread(image_path)
 
         if image is None:
-            print("Image is None")
             return None
 
-        print("STEP 3 - Image Loaded")
-
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-        print("STEP 4 - Gray Complete")
-
-        h, w = gray.shape
-        print("Image Size:", w, "x", h)
-
-        gray = cv2.resize(
-            gray,
-            None,
-            fx=4,
-            fy=4,
-            interpolation=cv2.INTER_CUBIC
+        # Convert to grayscale
+        gray = cv2.cvtColor(
+            image,
+            cv2.COLOR_BGR2GRAY
         )
 
-        print("STEP 5 - Resize Complete")
+        # Resize only if the image is small
+        height, width = gray.shape
 
-        _, thresh = cv2.threshold(
-            gray,
-            140,
-            255,
-            cv2.THRESH_BINARY
-        )
+        if width < 1000:
+            gray = cv2.resize(
+                gray,
+                None,
+                fx=4,
+                fy=4,
+                interpolation=cv2.INTER_CUBIC
+            )
 
-        print("STEP 6 - Threshold Complete")
+        best_number = None
 
-        text = pytesseract.image_to_string(
-            thresh,
-            config="--oem 3 --psm 7 -c tessedit_char_whitelist=0123456789"
-        )
+        # Only two thresholds (saves memory)
+        for threshold in [120, 160]:
 
-        print("STEP 7 - OCR Finished")
+            _, thresh = cv2.threshold(
+                gray,
+                threshold,
+                255,
+                cv2.THRESH_BINARY
+            )
 
-        print("OCR TEXT:", text)
+            # Only two OCR attempts
+            for psm in [6, 7]:
 
-        numbers = re.findall(r"\d+", text)
+                config = (
+                    f'--oem 3 '
+                    f'--psm {psm} '
+                    '-c tessedit_char_whitelist=0123456789'
+                )
 
-        print("Numbers:", numbers)
+                text = pytesseract.image_to_string(
+                    thresh,
+                    config=config
+                )
 
-        if numbers:
-            return numbers[0]
+                print("OCR:", text)
 
-        return None
+                numbers = re.findall(r"\d+", text)
+
+                if not numbers:
+                    continue
+
+                # Accept numbers between 3 and 6 digits
+                valid_numbers = []
+
+                for num in numbers:
+
+                    if 3 <= len(num) <= 6:
+                        valid_numbers.append(num)
+
+                if valid_numbers:
+
+                    # Remove duplicates
+                    valid_numbers = list(set(valid_numbers))
+
+                    # Prefer the longest number
+                    valid_numbers.sort(
+                        key=len,
+                        reverse=True
+                    )
+
+                    print("Detected:", valid_numbers)
+
+                    return valid_numbers[0]
+
+                # Keep the best fallback
+                for num in numbers:
+
+                    if (
+                        best_number is None
+                        or len(num) > len(best_number)
+                    ):
+                        best_number = num
+
+        return best_number
 
     except Exception as e:
+
         print("OCR ERROR:", e)
+
         return None
