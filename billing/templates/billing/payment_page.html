@@ -62,6 +62,7 @@ Payment Confirmation
 
                     <p><strong>Bill Amount:</strong> {{ bill.total_amount }}</p>
 <p><strong>Hash:</strong> {{ hash }}</p>
+
 <form method="post"
       action="https://sandbox.payhere.lk/pay/checkout">
 
@@ -69,19 +70,18 @@ Payment Confirmation
            name="merchant_id"
            value="1236737">
 
-    <!-- Render URLs -->
-    <input type="hidden"
-           name="return_url"
-           value="https://electricity-billing-system-kr7s.onrender.com/payhere-success/?bill_id={{ bill.id }}">
+    
+   <input type="hidden"
+       name="return_url"
+       value="https://electricity-billing-system-docker.onrender.com/payhere-success/?bill_id={{ bill.id }}">
+<input type="hidden"
+       name="cancel_url"
+       value="https://electricity-billing-system-docker.onrender.com/payhere-cancel/">
 
-    <input type="hidden"
-           name="cancel_url"
-           value="https://electricity-billing-system-kr7s.onrender.com/payhere-cancel/">
-
-    <input type="hidden"
-           name="notify_url"
-           value="https://electricity-billing-system-kr7s.onrender.com/payhere-notify/">
-
+<input type="hidden"
+       name="notify_url"
+       value="https://electricity-billing-system-docker.onrender.com/payhere-notify/">
+  
     <input type="hidden"
            name="order_id"
            value="{{ order_id }}">
@@ -132,12 +132,12 @@ Payment Confirmation
 
     <button type="submit"
             class="btn btn-success">
-        Pay with PayHere
+    
     </button>
 
     <a href="{% url 'bill_detail' bill.id %}"
        class="btn btn-secondary">
-        Cancel
+        
     </a>
 
 </form>

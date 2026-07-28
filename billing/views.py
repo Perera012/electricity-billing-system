@@ -498,13 +498,19 @@ def download_bill(request, bill_id):
 
     return response
 
+@login_required
 def payhere_success(request):
 
     bill_id = request.GET.get("bill_id")
 
     if bill_id:
+
         try:
-            bill = Bill.objects.get(id=bill_id)
+
+            bill = Bill.objects.get(
+                id=bill_id,
+                user=request.user
+            )
 
             payment_exists = Payment.objects.filter(
                 bill=bill,
@@ -512,6 +518,7 @@ def payhere_success(request):
             ).exists()
 
             if not payment_exists:
+
                 Payment.objects.create(
                     user=bill.user,
                     bill=bill,
@@ -529,23 +536,10 @@ def payhere_success(request):
             )
 
         except Bill.DoesNotExist:
+
             messages.error(
                 request,
                 "Bill not found."
             )
 
-    return redirect("home")
-
-def payhere_cancel(request):
-
-    return HttpResponse(
-        "Payment was cancelled."
-    )
-
-def payhere_notify(request):
-
-    print("PAYHERE NOTIFY HIT")
-    print(request.POST)
-
-    return HttpResponse("OK")
-
+    return redirect("payment_history")
