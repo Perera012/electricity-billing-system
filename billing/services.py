@@ -4,7 +4,7 @@ import re
 import os
 import platform
 
-# Configure Tesseract
+# Configure Tesseract path
 if platform.system() == "Windows":
     pytesseract.pytesseract.tesseract_cmd = (
         r"C:\Program Files\Tesseract-OCR\tesseract.exe"
@@ -31,10 +31,10 @@ def extract_meter_reading(image_path):
             cv2.COLOR_BGR2GRAY
         )
 
-        # Resize only if the image is small
-        height, width = gray.shape
+        # Resize only if image is small
+        h, w = gray.shape
 
-        if width < 1000:
+        if w < 1000:
             gray = cv2.resize(
                 gray,
                 None,
@@ -43,72 +43,47 @@ def extract_meter_reading(image_path):
                 interpolation=cv2.INTER_CUBIC
             )
 
-        best_number = None
+        # OCR directly on grayscale image
+        config = (
+            "--oem 3 "
+            "--psm 7 "
+            "-c tessedit_char_whitelist=0123456789"
+        )
 
-        # Only two thresholds (saves memory)
-        for threshold in [120, 160]:
+        text = pytesseract.image_to_string(
+            gray,
+            config=config
+        )
 
-            _, thresh = cv2.threshold(
-                gray,
-                threshold,
-                255,
-                cv2.THRESH_BINARY
+        print("OCR:", text)
+
+        numbers = re.findall(r"\d+", text)
+
+        if not numbers:
+            return None
+
+        # Accept numbers with 3–6 digits
+        valid_numbers = []
+
+        for num in numbers:
+
+            if 3 <= len(num) <= 6:
+                valid_numbers.append(num)
+
+        if valid_numbers:
+
+            valid_numbers = list(set(valid_numbers))
+
+            valid_numbers.sort(
+                key=len,
+                reverse=True
             )
 
-            # Only two OCR attempts
-            for psm in [6, 7]:
+            print("Detected:", valid_numbers)
 
-                config = (
-                    f'--oem 3 '
-                    f'--psm {psm} '
-                    '-c tessedit_char_whitelist=0123456789'
-                )
+            return valid_numbers[0]
 
-                text = pytesseract.image_to_string(
-                    thresh,
-                    config=config
-                )
-
-                print("OCR:", text)
-
-                numbers = re.findall(r"\d+", text)
-
-                if not numbers:
-                    continue
-
-                # Accept numbers between 3 and 6 digits
-                valid_numbers = []
-
-                for num in numbers:
-
-                    if 3 <= len(num) <= 6:
-                        valid_numbers.append(num)
-
-                if valid_numbers:
-
-                    # Remove duplicates
-                    valid_numbers = list(set(valid_numbers))
-
-                    # Prefer the longest number
-                    valid_numbers.sort(
-                        key=len,
-                        reverse=True
-                    )
-
-                    print("Detected:", valid_numbers)
-
-                    return valid_numbers[0]
-
-                # Keep the best fallback
-                for num in numbers:
-
-                    if (
-                        best_number is None
-                        or len(num) > len(best_number)
-                    ):
-                        best_number = num
-
-        return best_number
+        return numbers[0]
 
     except Exception as e:
 
