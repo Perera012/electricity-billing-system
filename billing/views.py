@@ -543,3 +543,13 @@ def payhere_success(request):
             )
 
     return redirect("payment_history")
+
+
+def payhere_cancel(request):
+    return HttpResponse("Payment was cancelled.")
+
+
+def payhere_notify(request):
+    print("PAYHERE NOTIFY HIT")
+    print(request.POST)
+    return HttpResponse("OK")
