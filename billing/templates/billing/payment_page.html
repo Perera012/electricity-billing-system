@@ -54,93 +54,95 @@ Payment Confirmation
                     </table>
 
                     <div class="alert alert-info">
-
                         <strong>Payment Gateway:</strong>
                         PayHere Sandbox
-
                     </div>
 
-                    <p><strong>Bill Amount:</strong> {{ bill.total_amount }}</p>
-<p><strong>Hash:</strong> {{ hash }}</p>
+                    <p><strong>Bill Amount:</strong> Rs. {{ bill.total_amount }}</p>
+                    <p><strong>Hash:</strong> {{ hash }}</p>
 
-<form method="post"
-      action="https://sandbox.payhere.lk/pay/checkout">
+                    <form method="post"
+                          action="https://sandbox.payhere.lk/pay/checkout">
 
-    <input type="hidden"
-           name="merchant_id"
-           value="1236737">
+                        <input type="hidden"
+                               name="merchant_id"
+                               value="1236737">
 
-    
-   <input type="hidden"
-       name="return_url"
-       value="https://electricity-billing-system-docker.onrender.com/payhere-success/?bill_id={{ bill.id }}">
-<input type="hidden"
-       name="cancel_url"
-       value="https://electricity-billing-system-docker.onrender.com/payhere-cancel/">
+                        <input type="hidden"
+                               name="return_url"
+                               value="https://electricity-billing-system-docker.onrender.com/payhere-success/?bill_id={{ bill.id }}">
 
-<input type="hidden"
-       name="notify_url"
-       value="https://electricity-billing-system-docker.onrender.com/payhere-notify/">
-  
-    <input type="hidden"
-           name="order_id"
-           value="{{ order_id }}">
+                        <input type="hidden"
+                               name="cancel_url"
+                               value="https://electricity-billing-system-docker.onrender.com/payhere-cancel/">
 
-    <input type="hidden"
-           name="items"
-           value="Electricity Bill">
+                        <input type="hidden"
+                               name="notify_url"
+                               value="https://electricity-billing-system-docker.onrender.com/payhere-notify/">
 
-    <input type="hidden"
-           name="currency"
-           value="LKR">
+                        <input type="hidden"
+                               name="order_id"
+                               value="{{ order_id }}">
 
-    <input type="hidden"
-           name="amount"
-           value="{{ bill.total_amount|floatformat:2 }}">
+                        <input type="hidden"
+                               name="items"
+                               value="Electricity Bill">
 
-    <input type="hidden"
-           name="hash"
-           value="{{ hash }}">
+                        <input type="hidden"
+                               name="currency"
+                               value="LKR">
 
-    <input type="hidden"
-           name="first_name"
-           value="{{ bill.user.username }}">
+                        <input type="hidden"
+                               name="amount"
+                               value="{{ bill.total_amount|floatformat:2 }}">
 
-    <input type="hidden"
-           name="last_name"
-           value="Customer">
+                        <input type="hidden"
+                               name="hash"
+                               value="{{ hash }}">
 
-    <input type="hidden"
-           name="email"
-           value="akashperera2207@gmail.com">
+                        <input type="hidden"
+                               name="first_name"
+                               value="{{ bill.user.username }}">
 
-    <input type="hidden"
-           name="phone"
-           value="0779810033">
+                        <input type="hidden"
+                               name="last_name"
+                               value="Customer">
 
-    <input type="hidden"
-           name="address"
-           value="Colombo">
+                        <input type="hidden"
+                               name="email"
+                               value="akashperera2207@gmail.com">
 
-    <input type="hidden"
-           name="city"
-           value="Colombo">
+                        <input type="hidden"
+                               name="phone"
+                               value="0779810033">
 
-    <input type="hidden"
-           name="country"
-           value="Sri Lanka">
+                        <input type="hidden"
+                               name="address"
+                               value="Colombo">
 
-    <button type="submit"
-            class="btn btn-success">
-    
-    </button>
+                        <input type="hidden"
+                               name="city"
+                               value="Colombo">
 
-    <a href="{% url 'bill_detail' bill.id %}"
-       class="btn btn-secondary">
-        
-    </a>
+                        <input type="hidden"
+                               name="country"
+                               value="Sri Lanka">
 
-</form>
+                        <div class="d-flex gap-2 mt-4">
+
+                            <button type="submit"
+                                    class="btn btn-success">
+                                Pay Now
+                            </button>
+
+                            <a href="{% url 'bill_detail' bill.id %}"
+                               class="btn btn-secondary">
+                                Back
+                            </a>
+
+                        </div>
+
+                    </form>
 
                 </div>
 
