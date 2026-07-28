@@ -15,100 +15,67 @@ else:
 
 def extract_meter_reading(image_path):
 
-    if not os.path.exists(image_path):
-        return None
+    try:
+        print("STEP 1 - File Exists")
 
-    image = cv2.imread(image_path)
+        if not os.path.exists(image_path):
+            print("File not found")
+            return None
 
-    if image is None:
-        return None
+        print("STEP 2 - Reading Image")
 
-    # Convert to grayscale
-    gray = cv2.cvtColor(
-        image,
-        cv2.COLOR_BGR2GRAY
-    )
+        image = cv2.imread(image_path)
 
-    # Enlarge image
-    gray = cv2.resize(
-        gray,
-        None,
-        fx=8,
-        fy=8,
-        interpolation=cv2.INTER_CUBIC
-    )
+        if image is None:
+            print("Image is None")
+            return None
 
-    best_number = None
+        print("STEP 3 - Image Loaded")
 
-    # Try multiple thresholds
-    for threshold in [80, 100, 120, 140, 160, 180, 200]:
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+        print("STEP 4 - Gray Complete")
+
+        h, w = gray.shape
+        print("Image Size:", w, "x", h)
+
+        gray = cv2.resize(
+            gray,
+            None,
+            fx=4,
+            fy=4,
+            interpolation=cv2.INTER_CUBIC
+        )
+
+        print("STEP 5 - Resize Complete")
 
         _, thresh = cv2.threshold(
             gray,
-            threshold,
+            140,
             255,
             cv2.THRESH_BINARY
         )
 
-        kernel = cv2.getStructuringElement(
-            cv2.MORPH_RECT,
-            (2, 2)
-        )
+        print("STEP 6 - Threshold Complete")
 
-        thresh = cv2.dilate(
+        text = pytesseract.image_to_string(
             thresh,
-            kernel,
-            iterations=1
+            config="--oem 3 --psm 7 -c tessedit_char_whitelist=0123456789"
         )
 
-        # Try different page segmentation modes
-        for psm in [6, 7, 8, 13]:
+        print("STEP 7 - OCR Finished")
 
-            config = (
-                f'--oem 3 '
-                f'--psm {psm} '
-                '-c tessedit_char_whitelist=0123456789'
-            )
+        print("OCR TEXT:", text)
 
-            text = pytesseract.image_to_string(
-                thresh,
-                config=config
-            )
+        numbers = re.findall(r"\d+", text)
 
-            print("OCR:", text)
+        print("Numbers:", numbers)
 
-            numbers = re.findall(r"\d+", text)
+        if numbers:
+            return numbers[0]
 
-            valid_numbers = []
+        return None
 
-            for num in numbers:
-
-                # Most electricity meters contain 4-6 digits
-                if 4 <= len(num) <= 6:
-                    valid_numbers.append(num)
-
-            if valid_numbers:
-
-                # Remove duplicates
-                valid_numbers = list(set(valid_numbers))
-
-                # Prefer the longest number
-                valid_numbers.sort(
-                    key=len,
-                    reverse=True
-                )
-
-                print("Valid Numbers:", valid_numbers)
-
-                return valid_numbers[0]
-
-            # Fallback if OCR only finds short numbers
-            for num in numbers:
-
-                if best_number is None:
-                    best_number = num
-
-                elif len(num) > len(best_number):
-                    best_number = num
-
-    return best_number
+    except Exception as e:
+        print("OCR ERROR:", e)
+        return None
