@@ -15,98 +15,106 @@ rgba(0,0,0,0.25),
 rgba(0,0,0,0.25)
 ),
 url('/static/images/power.jpg');
-background-size:cover;
-background-position:center;
-min-height:550px;
-border-radius:0 0 20px 20px;
+background-size: cover;
+background-position: center;
+min-height: 550px;
+border-radius: 0 0 20px 20px;
 ">
 
-<div class="container-fluid py-5 px-5">
+    <div class="container-fluid py-5 px-5">
 
-<div class="row align-items-center">
+        <div class="row align-items-center">
 
-<div class="col-lg-7 text-white">
+            <!-- LEFT SIDE -->
 
-<h1 class="display-2 fw-bold">
-Smart Electricity Billing System
-</h1>
+            <div class="col-lg-7 text-white">
 
-<h2 class="fw-light">
-Online Payment Management System
-</h2>
+                <h1 class="display-2 fw-bold">
+                    Smart Electricity Billing System
+                </h1>
 
-<p class="lead mt-4">
-Pay bills online securely, submit meter readings,
-view bill history and manage your electricity account.
-</p>
+                <h2 class="fw-light">
+                    Online Payment Management System
+                </h2>
 
-{% if user.is_authenticated %}
+                <p class="lead mt-4">
+                    Pay bills online securely, submit meter readings,
+                    view bill history and manage your electricity account.
+                </p>
 
-<a href="/add-reading/" class="btn btn-warning btn-lg me-2">
-Add Meter Reading
-</a>
+                {% if user.is_authenticated %}
 
-<a href="/bill-history/" class="btn btn-light btn-lg">
-View Bills
-</a>
+                    <a href="/add-reading/" class="btn btn-warning btn-lg me-2">
+                        Add Meter Reading
+                    </a>
 
-{% else %}
+                    <a href="/bill-history/" class="btn btn-light btn-lg">
+                        View Bills
+                    </a>
 
-<a href="/accounts/login/" class="btn btn-success btn-lg me-2">
-Login
-</a>
+                {% else %}
 
-<a href="/users/register/" class="btn btn-light btn-lg">
-Register
-</a>
+                    <a href="/accounts/login/" class="btn btn-success btn-lg me-2">
+                        Login
+                    </a>
 
-{% endif %}
+                    <a href="/users/register/" class="btn btn-light btn-lg">
+                        Register
+                    </a>
 
-</div>
+                {% endif %}
 
-{% if user.is_authenticated %}
+            </div>
 
-<div class="col-lg-4 offset-lg-1">
+            <!-- RIGHT SIDE -->
 
-<div class="card shadow-lg border-0">
+            {% if user.is_authenticated %}
 
-<div class="card-body p-4">
+            <div class="col-lg-4 offset-lg-1">
 
-<h2>Account Summary</h2>
+                <div class="card shadow-lg border-0 rounded-4">
 
-<hr>
+                    <div class="card-body p-4">
 
-<p>
-<strong>User:</strong>
-{{ user.username }}
-</p>
+                        <h2 class="mb-3">
+                            Account Summary
+                        </h2>
 
-<p>
-<strong>Status:</strong>
-Active
-</p>
+                        <hr>
 
-<p>
-<strong>Customer Type:</strong>
-Domestic
-</p>
+                        <p>
+                            <strong>User:</strong>
+                            {{ masked_username }}
+                        </p>
 
-<p>
-<strong>System:</strong>
-Smart Billing
-</p>
+                        <p>
+                            <strong>Customer ID:</strong>
+                            CEB{{ request.user.id|stringformat:"05d" }}
+                        </p>
 
-</div>
+                        <p>
+                            <strong>Status:</strong>
+                            <span class="badge bg-success">
+                                Active
+                            </span>
+                        </p>
 
-</div>
+                        <p>
+                            <strong>Customer Type:</strong>
+                            Domestic
+                        </p>
 
-</div>
+                    </div>
 
-{% endif %}
+                </div>
 
-</div>
+            </div>
 
-</div>
+            {% endif %}
+
+        </div>
+
+    </div>
 
 </div>
 
@@ -116,109 +124,105 @@ Smart Billing
 
 <div class="container mt-5">
 
-<h2 class="text-center mb-4">
-Quick Actions
-</h2>
+    <h2 class="text-center mb-4">
+        Quick Actions
+    </h2>
 
-<div class="row g-4">
+    <div class="row g-4">
 
-<div class="col-md-3">
+        <div class="col-md-3">
 
-<div class="card shadow h-100 text-center">
+            <div class="card shadow h-100 text-center">
 
-<div class="card-body">
+                <div class="card-body">
 
-<h4>Add Reading</h4>
+                    <h4>Add Reading</h4>
 
-<p>
-Submit your current meter reading.
-</p>
+                    <p>
+                        Submit your current meter reading.
+                    </p>
 
-<a href="/add-reading/"
-class="btn btn-primary">
-Open
-</a>
+                    <a href="/add-reading/" class="btn btn-primary">
+                        Open
+                    </a>
 
-</div>
+                </div>
 
-</div>
+            </div>
 
-</div>
+        </div>
 
-<div class="col-md-3">
+        <div class="col-md-3">
 
-<div class="card shadow h-100 text-center">
+            <div class="card shadow h-100 text-center">
 
-<div class="card-body">
+                <div class="card-body">
 
-<h4>Bill History</h4>
+                    <h4>Bill History</h4>
 
-<p>
-View all generated bills.
-</p>
+                    <p>
+                        View all generated bills.
+                    </p>
 
-<a href="/bill-history/"
-class="btn btn-warning">
-Open
-</a>
+                    <a href="/bill-history/" class="btn btn-warning">
+                        Open
+                    </a>
 
-</div>
+                </div>
 
-</div>
+            </div>
 
-</div>
+        </div>
 
-<div class="col-md-3">
+        <div class="col-md-3">
 
-<div class="card shadow h-100 text-center">
+            <div class="card shadow h-100 text-center">
 
-<div class="card-body">
+                <div class="card-body">
 
-<h4>Payment History</h4>
+                    <h4>Payment History</h4>
 
-<p>
-View payment transactions.
-</p>
+                    <p>
+                        View payment transactions.
+                    </p>
 
-<a href="/payment-history/"
-class="btn btn-success">
-Open
-</a>
+                    <a href="/payment-history/" class="btn btn-success">
+                        Open
+                    </a>
 
-</div>
+                </div>
 
-</div>
+            </div>
 
-</div>
+        </div>
 
-{% if user.is_staff %}
+        {% if user.is_staff %}
 
-<div class="col-md-3">
+        <div class="col-md-3">
 
-<div class="card shadow h-100 text-center">
+            <div class="card shadow h-100 text-center">
 
-<div class="card-body">
+                <div class="card-body">
 
-<h4>Admin Panel</h4>
+                    <h4>Admin Panel</h4>
 
-<p>
-Manage the system.
-</p>
+                    <p>
+                        Manage the system.
+                    </p>
 
-<a href="/admin/"
-class="btn btn-dark">
-Open
-</a>
+                    <a href="/admin/" class="btn btn-dark">
+                        Open
+                    </a>
 
-</div>
+                </div>
 
-</div>
+            </div>
 
-</div>
+        </div>
 
-{% endif %}
+        {% endif %}
 
-</div>
+    </div>
 
 </div>
 

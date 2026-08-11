@@ -11,9 +11,26 @@ import hashlib
 from decimal import Decimal
 from .services import extract_meter_reading
 from django.contrib import messages
+from django.contrib.auth import login
 
+@login_required
 def home(request):
-    return render(request, 'billing/home.html')
+    username = request.user.username
+
+    if len(username) > 4:
+        masked_username = (
+            username[:2] +
+            "*" * (len(username) - 4) +
+            username[-2:]
+        )
+    else:
+        masked_username = "*" * len(username)
+
+    context = {
+        "masked_username": masked_username,
+    }
+
+    return render(request, "billing/home.html", context)
 
 @login_required
 def add_meter_reading(request):
@@ -81,7 +98,7 @@ def add_meter_reading(request):
             )
 
             # --------------------------------------------------
-            # SAVE FIRST (This saves the image to media/)
+            # SAVE FIRST 
             # --------------------------------------------------
             meter_reading.save()
 
@@ -498,19 +515,14 @@ def download_bill(request, bill_id):
 
     return response
 
-@login_required
+
 def payhere_success(request):
 
     bill_id = request.GET.get("bill_id")
 
     if bill_id:
-
         try:
-
-            bill = Bill.objects.get(
-                id=bill_id,
-                user=request.user
-            )
+            bill = Bill.objects.get(id=bill_id)
 
             payment_exists = Payment.objects.filter(
                 bill=bill,
@@ -518,7 +530,6 @@ def payhere_success(request):
             ).exists()
 
             if not payment_exists:
-
                 Payment.objects.create(
                     user=bill.user,
                     bill=bill,
@@ -536,14 +547,12 @@ def payhere_success(request):
             )
 
         except Bill.DoesNotExist:
-
             messages.error(
                 request,
                 "Bill not found."
             )
 
     return redirect("payment_history")
-
 
 def payhere_cancel(request):
     return HttpResponse("Payment was cancelled.")
