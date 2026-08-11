@@ -54,10 +54,31 @@ def add_meter_reading(request):
 
             meter_reading = form.save(commit=False)
 
+            # --------------------------------------------------
+            # CHECK BILLING MONTH SEQUENCE
+            # --------------------------------------------------
+
+            month_numbers = {
+                'January': 1,
+                'February': 2,
+                'March': 3,
+                'April': 4,
+                'May': 5,
+                'June': 6,
+                'July': 7,
+                'August': 8,
+                'September': 9,
+                'October': 10,
+                'November': 11,
+                'December': 12
+            }
+
+            selected_month = meter_reading.month
+
             # Check duplicate month
             existing = Bill.objects.filter(
                 user=request.user,
-                meter_reading__month=meter_reading.month
+                meter_reading__month=selected_month
             ).exists()
 
             if existing:
@@ -71,43 +92,131 @@ def add_meter_reading(request):
                     }
                 )
 
+            # --------------------------------------------------
+            # FIRST READING
+            # --------------------------------------------------
+
             meter_reading.user = request.user
 
-            # Auto set previous reading
-            if last_reading:
-                meter_reading.previous_reading = last_reading.current_reading
-            else:
-                meter_reading.previous_reading = 0
+            if last_reading is None:
 
-            # Validate current reading
+                # First reading can start from any month
+                # Use the previous reading entered by the customer
+                meter_reading.previous_reading = (
+                    form.cleaned_data['previous_reading']
+                )
+
+            # --------------------------------------------------
+            # SUBSEQUENT READINGS
+            # --------------------------------------------------
+
+            else:
+
+                last_month = last_reading.month
+
+                last_month_number = month_numbers.get(
+                    last_month
+                )
+
+                selected_month_number = month_numbers.get(
+                    selected_month
+                )
+
+                # Validate month names
+                if (
+                    last_month_number is None
+                    or selected_month_number is None
+                ):
+                    return render(
+                        request,
+                        'billing/add_meter_reading.html',
+                        {
+                            'form': form,
+                            'last_reading': last_reading,
+                            'error': 'Invalid billing month selected.'
+                        }
+                    )
+
+                # Calculate expected next month
+                if last_month_number == 12:
+                    expected_month_number = 1
+                else:
+                    expected_month_number = last_month_number + 1
+
+                # Check whether selected month is the next month
+                if selected_month_number != expected_month_number:
+
+                    next_month = next(
+                        month
+                        for month, number
+                        in month_numbers.items()
+                        if number == expected_month_number
+                    )
+
+                    return render(
+                        request,
+                        'billing/add_meter_reading.html',
+                        {
+                            'form': form,
+                            'last_reading': last_reading,
+                            'error': (
+                                f'Your latest meter reading is for '
+                                f'{last_month}. Please submit the '
+                                f'{next_month} reading next.'
+                            )
+                        }
+                    )
+
+                # Automatically use previous current reading
+                meter_reading.previous_reading = (
+                    last_reading.current_reading
+                )
+
+            # --------------------------------------------------
+            # VALIDATE CURRENT READING
+            # --------------------------------------------------
+
             if meter_reading.current_reading <= meter_reading.previous_reading:
+
                 return render(
                     request,
                     'billing/add_meter_reading.html',
                     {
                         'form': form,
                         'last_reading': last_reading,
-                        'error': f'Current reading must be greater than the previous reading ({meter_reading.previous_reading}).'
+                        'error': (
+                            f'Current reading must be greater than '
+                            f'the previous reading '
+                            f'({meter_reading.previous_reading}).'
+                        )
                     }
                 )
 
-            # Calculate units used
+            # --------------------------------------------------
+            # CALCULATE UNITS USED
+            # --------------------------------------------------
+
             meter_reading.units_used = (
-                meter_reading.current_reading -
-                meter_reading.previous_reading
+                meter_reading.current_reading
+                - meter_reading.previous_reading
             )
 
             # --------------------------------------------------
-            # SAVE FIRST 
+            # SAVE FIRST
             # --------------------------------------------------
+
             meter_reading.save()
 
             # --------------------------------------------------
-            # OCR Verification
+            # OCR VERIFICATION
             # --------------------------------------------------
+
             if meter_reading.meter_image:
 
-                print("Saved Image Path:", meter_reading.meter_image.path)
+                print(
+                    "Saved Image Path:",
+                    meter_reading.meter_image.path
+                )
 
                 ocr_result = extract_meter_reading(
                     meter_reading.meter_image.path
@@ -124,11 +233,15 @@ def add_meter_reading(request):
                         {
                             'form': form,
                             'last_reading': last_reading,
-                            'error': 'Unable to read the uploaded meter image. Please upload a clearer image.'
+                            'error': (
+                                'Unable to read the uploaded meter image. '
+                                'Please upload a clearer image.'
+                            )
                         }
                     )
 
                 try:
+
                     ocr_reading = int(ocr_result)
 
                 except ValueError:
@@ -141,11 +254,15 @@ def add_meter_reading(request):
                         {
                             'form': form,
                             'last_reading': last_reading,
-                            'error': 'OCR detected an invalid meter reading.'
+                            'error': (
+                                'OCR detected an invalid meter reading.'
+                            )
                         }
                     )
 
-                entered_reading = int(meter_reading.current_reading)
+                entered_reading = int(
+                    meter_reading.current_reading
+                )
 
                 if ocr_reading != entered_reading:
 
@@ -157,11 +274,18 @@ def add_meter_reading(request):
                         {
                             'form': form,
                             'last_reading': last_reading,
-                            'error': f'OCR detected {ocr_reading}, but you entered {entered_reading}. Please verify your reading.'
+                            'error': (
+                                f'OCR detected {ocr_reading}, '
+                                f'but you entered {entered_reading}. '
+                                f'Please verify your reading.'
+                            )
                         }
                     )
 
-            # Create Bill
+            # --------------------------------------------------
+            # CREATE BILL
+            # --------------------------------------------------
+
             total_amount = calculate_bill(
                 meter_reading.units_used
             )
@@ -176,6 +300,7 @@ def add_meter_reading(request):
             return redirect('bill_history')
 
     else:
+
         form = MeterReadingForm()
 
     return render(
