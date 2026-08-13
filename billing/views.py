@@ -92,20 +92,12 @@ def add_meter_reading(request):
                     }
                 )
 
-            # --------------------------------------------------
-            # FIRST READING
-            # --------------------------------------------------
-
-            meter_reading.user = request.user
-
             if last_reading is None:
 
-                # First reading can start from any month
-                # Use the previous reading entered by the customer
-                meter_reading.previous_reading = (
-                    form.cleaned_data['previous_reading']
-                )
-
+         # First reading can start from any month
+          # Use the previous reading already provided by the form
+              if meter_reading.previous_reading is None:
+               meter_reading.previous_reading = 0
             # --------------------------------------------------
             # SUBSEQUENT READINGS
             # --------------------------------------------------
