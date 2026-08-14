@@ -78,7 +78,7 @@ def add_meter_reading(request):
             meter_reading = form.save(commit=False)
 
             # --------------------------------------------------
-            # IMPORTANT: ASSIGN LOGGED-IN USER
+            # ASSIGN LOGGED-IN USER
             # --------------------------------------------------
             meter_reading.user = request.user
 
@@ -112,7 +112,6 @@ def add_meter_reading(request):
             # --------------------------------------------------
             if last_reading is None:
 
-                # First reading starts from zero
                 meter_reading.previous_reading = 0
 
             # --------------------------------------------------
@@ -214,6 +213,25 @@ def add_meter_reading(request):
             )
 
             # --------------------------------------------------
+            # METER IMAGE REQUIRED
+            # --------------------------------------------------
+            if not meter_reading.meter_image:
+
+                return render(
+                    request,
+                    'billing/add_meter_reading.html',
+                    {
+                        'form': form,
+                        'last_reading': last_reading,
+                        'error': (
+                            'Meter image is required. '
+                            'Please upload a clear image of your '
+                            'electricity meter.'
+                        )
+                    }
+                )
+
+            # --------------------------------------------------
             # SAVE METER READING
             # --------------------------------------------------
             meter_reading.save()
@@ -232,7 +250,9 @@ def add_meter_reading(request):
                     meter_reading.meter_image.path
                 )
 
-                # OCR could not read image
+                # --------------------------------------------------
+                # OCR COULD NOT READ IMAGE
+                # --------------------------------------------------
                 if ocr_result is None:
 
                     meter_reading.delete()
@@ -338,6 +358,7 @@ def add_meter_reading(request):
             'last_reading': last_reading
         }
     )
+
 @login_required
 def bill_history(request):
 
