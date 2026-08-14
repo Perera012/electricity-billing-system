@@ -693,18 +693,28 @@ def payhere_success(request):
                 bill.bill_status = "Paid"
                 bill.save()
 
+            # Restore the customer's authenticated session
+            login(
+                request,
+                bill.user,
+                backend="django.contrib.auth.backends.ModelBackend"
+            )
+
             messages.success(
                 request,
                 "Payment completed successfully."
             )
 
+            return redirect("payment_history")
+
         except Bill.DoesNotExist:
+
             messages.error(
                 request,
                 "Bill not found."
             )
 
-    return redirect("payment_history")
+    return redirect("home")
 
 def payhere_cancel(request):
     return HttpResponse("Payment was cancelled.")
