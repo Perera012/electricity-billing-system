@@ -10,6 +10,7 @@ if platform.system() == "Windows":
         r"C:\Program Files\Tesseract-OCR\tesseract.exe"
     )
 else:
+
     pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 
 
@@ -87,6 +88,9 @@ def extract_meter_reading(image_path):
 
     except Exception as e:
 
-        print("OCR ERROR:", e)
+     print("========== OCR ERROR ==========")
+    print("OCR ERROR TYPE:", type(e).__name__)
+    print("OCR ERROR:", str(e))
+    print("================================")
 
-        return None
+    return None
